@@ -36,19 +36,21 @@ export default function CaptureScreen({ navigation }) {
       name: 'image.jpg',
       type: 'image/jpeg',
     });
-
+  
     try {
       console.log(`Uploading image to ${SERVER_URL}/${endpoint}`);
+      console.log('Form Data:', formData);
+  
       const response = await axios.post(`${SERVER_URL}/${endpoint}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'Accept': 'image/png' // Ensure the server sends the image back
+          'Accept': 'image/png', // Ensure the server sends the image back
         },
         responseType: 'arraybuffer', // Expect a binary response
       });
-
+  
       console.log('Server response:', response);
-
+  
       if (response.status === 200) {
         const base64 = btoa(
           new Uint8Array(response.data).reduce(
@@ -64,11 +66,11 @@ export default function CaptureScreen({ navigation }) {
         Alert.alert('Error', 'Failed to upload image.');
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('Upload error:', error.response ? error.response.data : error.message);
       Alert.alert('Upload error', error.message);
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <Button title="Capture Reference Spectrum" onPress={() => pickImage('reference')} />

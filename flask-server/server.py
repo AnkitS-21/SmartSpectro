@@ -61,20 +61,22 @@ def analyze_sample():
             # Process sample image to get wavelengths and intensities
             sample_wavelengths, sample_intensities = get_RGB_and_intensity(sample_image_rgb)
 
-            min_length = min(len(reference_spectrum), len(sample_intensities))
+            reference_wavelengths, reference_intensities = get_RGB_and_intensity(load_image('captured_reference.png'))
+
+            min_length = min(len(reference_intensities), len(sample_intensities))
             absorbance = []
 
             for i in range(min_length):
-                if np.any(sample_intensities[i] == 0) or np.any(reference_spectrum[i][1] == 0):
+                if sample_intensities[i] == 0 or reference_intensities[i] == 0:
                     absorbance.append(0)
                 else:
-                    absorbance.append(np.log10(reference_spectrum[i][1] / sample_intensities[i]))
+                    absorbance.append(np.log10(reference_intensities[i] / sample_intensities[i]))
 
             # Plot absorbance vs wavelength
             fig = Figure()
             canvas = FigureCanvas(fig)
             ax = fig.add_subplot(111)
-            ax.plot([wl for wl, _ in reference_spectrum[:min_length]], absorbance, marker='o', linestyle='-', markersize=1, linewidth=0.2)
+            ax.plot(reference_wavelengths[:min_length], absorbance, linestyle='-', linewidth=0.5)
             ax.set_xlabel('Wavelength (nm)')
             ax.set_ylabel('Absorbance')
             ax.set_title('Absorbance vs Wavelength')
@@ -94,6 +96,10 @@ def analyze_sample():
     else:
         return jsonify({'error': 'Method not allowed'}), 405
 
+def get_wavelength_from_color(r, g, b):
+    distance, index = tree.query([r, g, b])
+    wavelength = reference_spectrum[index][0]
+    return wavelength
 
 def get_RGB_and_intensity(image_rgb):
     height, width, _ = image_rgb.shape
@@ -102,9 +108,8 @@ def get_RGB_and_intensity(image_rgb):
 
     for x in range(width):
         avg_color = np.mean(image_rgb[:, x, :], axis=0)
-        r, g, b = avg_color 
-        distance, index = tree.query([r, g, b])
-        wavelength = reference_spectrum[index][0]
+        r, g, b = avg_color
+        wavelength = get_wavelength_from_color(r, g, b)
         intensity = 0.2126 * r + 0.7152 * g + 0.0722 * b
         wavelengths.append(wavelength)
         intensities.append(intensity)
