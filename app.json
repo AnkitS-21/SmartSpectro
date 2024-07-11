@@ -2,6 +2,15 @@
   "expo": {
     "name": "SmartSpectro",
     "slug": "SmartSpectro",
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photos to upload images.",
+          "cameraPermission": "The app needs access to your camera to capture images."
+        }
+      ]
+    ],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
